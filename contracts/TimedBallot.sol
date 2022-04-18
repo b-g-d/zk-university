@@ -6,7 +6,7 @@ pragma solidity >=0.7.0 <0.9.0;
  * @title Ballot
  * @dev Implements voting process along with vote delegation
  */
-contract Ballot {
+contract TimedBallot {
    
     struct Voter {
         uint weight; // weight is accumulated by delegation
@@ -50,9 +50,9 @@ contract Ballot {
         startTime = block.timestamp; 
     }
 
-    function checkIfTimeIsUp() public returns (bool) {
-        return true;
-        // return (block.timestamp >= (startTime + 5 minutes));
+    modifier hasTime() {
+        require (block.timestamp < (startTime + 5 minutes));
+        _;
     }
     
     /** 
@@ -105,8 +105,7 @@ contract Ballot {
      * @dev Give your vote (including votes delegated to you) to proposal 'proposals[proposal].name'.
      * @param proposal index of proposal in the proposals array
      */
-    function vote(uint proposal) public {
-        require(!checkIfTimeIsUp(), "Must vote before time expires");
+    function vote(uint proposal) public hasTime {
         Voter storage sender = voters[msg.sender];
         require(sender.weight != 0, "Has no right to vote");
         require(!sender.voted, "Already voted.");
